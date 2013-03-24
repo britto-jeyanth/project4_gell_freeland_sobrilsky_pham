@@ -17,7 +17,7 @@ import java.util.*;
  * operator is also provided.  Missing are update and delete data manipulation
  * operators.
  */
-public class Table
+public class IndexTable
        implements Serializable, Cloneable
 {
     /** Debug flag, turn off once implemented
@@ -62,13 +62,13 @@ public class Table
      * @param _domain     the string containing attribute domains (data types)
      * @param _key        the primary key
      */  
-    public Table (String _name, String [] _attribute, Class [] _domain, String [] _key)
+    public IndexTable (String _name, String [] _attribute, Class [] _domain, String [] _key)
     {
         name      = _name;
         attribute = _attribute;
         domain    = _domain;
         key       = _key;
-        tuples    = new FileList (this, tupleSize ());
+        tuples    = new IndexFileList (this, tupleSize ());
         //index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
         index     = new ExtHash<KeyType, Comparable[]> (KeyType.class, Comparable[].class, attribute.length);
         //index = new BpTree <KeyType, Comparable[]> (KeyType.class, Comparable[].class);	// code for index if using BpTree
@@ -80,7 +80,7 @@ public class Table
      * @param attributes  the string containing attributes names
      * @param domains     the string containing attribute domains (data types)
      */
-    public Table (String name, String attributes, String domains, String _key)
+    public IndexTable (String name, String attributes, String domains, String _key)
     {
         this (name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
@@ -92,7 +92,7 @@ public class Table
      * @param tab     the table supplying the meta-data
      * @param suffix  the suffix appended to create new table name
      */
-    public Table (Table tab, String suffix)
+    public IndexTable (IndexTable tab, String suffix)
     {
         this (tab.name + suffix, tab.attribute, tab.domain, tab.key);
     } // Table
@@ -105,7 +105,7 @@ public class Table
      * @return  the table consisting of projected tuples
      * @author Zachary Freeland
      */
-    public Table project (String attributeList)
+    public IndexTable project (String attributeList)
     {
         out.println ("RA> " + name + ".project (" + attributeList + ")");
 
@@ -142,7 +142,7 @@ public class Table
             newKey = pAttribute; //all attributes if not                                                                                                                 
 
 
-        Table     result     = new Table (name + count++, pAttribute, colDomain, newKey);
+        IndexTable     result     = new IndexTable (name + count++, pAttribute, colDomain, newKey);
 
         for (Comparable [] tup : tuples) {
             result.insert(extractTup (tup, colPos));
@@ -161,13 +161,13 @@ public class Table
      * @return the table consisting of tuples satisfying the condition
      * @author Ryan Gell
      */
-    public Table select (String condition)
+    public IndexTable select (String condition)
     {
         out.println ("RA> " + name + ".select (" + condition + ")");
 
        String [] postfix = infix2postfix (condition);
 	System.out.println(Arrays.toString(postfix));
-        Table     result  = new Table (name + count++, attribute, domain, key);
+        IndexTable     result  = new IndexTable (name + count++, attribute, domain, key);
 
         for (Comparable [] tup : tuples) {
             if (evalTup (postfix, tup)) result.insert(tup);
@@ -183,10 +183,10 @@ public class Table
      * @return  the table representing the union (this U table2)
      * @author minh pham
      */
-    public Table union (Table table2)
+    public IndexTable union (IndexTable table2)
     {
         out.println ("RA> " + name + ".union (" + table2.name + ")");
-        Table result = new Table (name + count++, attribute, domain, key);
+        IndexTable result = new IndexTable (name + count++, attribute, domain, key);
         if (!this.compatible(table2)){
         	return result;
         }
@@ -211,11 +211,11 @@ public class Table
      * @return  the table representing the difference (this - table2)
      * @author: Nicholas Sobrilsky
      */
-    public Table minus (Table table2)
+    public IndexTable minus (IndexTable table2)
     {
         out.println ("RA> " + name + ".minus (" + table2.name + ")");
 
-        Table result = new Table (name + count++, attribute, domain, key);
+        IndexTable result = new IndexTable (name + count++, attribute, domain, key);
 
 		if ( !this.compatible(table2) ){
 		    System.err.println("Error: Tables not compatible. " + name + " returned.");
@@ -247,7 +247,7 @@ public class Table
      * @return  the table representing the join (this |><| table2)
      * @author Nicholas Sobrilsky
      */
-    public Table join (String condition, Table table2)
+    public IndexTable join (String condition, IndexTable table2)
     { 
         out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
 	
@@ -309,7 +309,7 @@ public class Table
 		}
 	}
 	
-	Table result = new Table (name + count++, resultAttribute, resultDomain, key);
+	IndexTable result = new IndexTable (name + count++, resultAttribute, resultDomain, key);
 		
 	boolean noMatch=false;
 		
@@ -465,7 +465,7 @@ public class Table
      * @return  whether the two tables are compatible
      * @author  Nicholas Sobrilsky
      */
-    private boolean compatible (Table table2)
+    private boolean compatible (IndexTable table2)
     {
         if ( this.getAttributeLength()!=table2.getAttributeLength() ){
               return false;

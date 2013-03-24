@@ -3,7 +3,7 @@
  *
  * @author   John Miller
  */
-
+import java.nio.ByteBuffer;
 import java.io.Serializable;
 import static java.lang.Boolean.*;
 import static java.lang.System.out;
@@ -16,7 +16,7 @@ import java.util.*;
  * operator is also provided.  Missing are update and delete data manipulation
  * operators.
  */
-public class Table
+public class UnindexedTable
        implements Serializable, Cloneable
 {
     /** Debug flag, turn off once implemented
@@ -61,14 +61,14 @@ public class Table
      * @param _domain     the string containing attribute domains (data types)
      * @param _key        the primary key
      */  
-    public Table (String _name, String [] _attribute, Class [] _domain, String [] _key)
+    public UnindexedTable (String _name, String [] _attribute, Class [] _domain, String [] _key)
     {
         name      = _name;
         attribute = _attribute;
         domain    = _domain;
         key       = _key;
-        tuples    = new ArrayList <Comparable[]> ();                // also try FileList, see below
-//      tuples    = new FileList (this, tupleSize ());
+        //tuples    = new ArrayList <Comparable[]> ();                // also try FileList, see below
+        tuples    = new UnindexedFileList (this, tupleSize ());
         index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
     } // Table
 
@@ -78,7 +78,7 @@ public class Table
      * @param attributes  the string containing attributes names
      * @param domains     the string containing attribute domains (data types)
      */
-    public Table (String name, String attributes, String domains, String _key)
+    public UnindexedTable (String name, String attributes, String domains, String _key)
     {
         this (name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
@@ -90,7 +90,7 @@ public class Table
      * @param tab     the table supplying the meta-data
      * @param suffix  the suffix appended to create new table name
      */
-    public Table (Table tab, String suffix)
+    public UnindexedTable (UnindexedTable tab, String suffix)
     {
         this (tab.name + suffix, tab.attribute, tab.domain, tab.key);
     } // Table
@@ -103,7 +103,7 @@ public class Table
      * @return  the table consisting of projected tuples
      * @author Zachary Freeland
      */
-    public Table project (String attributeList)
+    public UnindexedTable project (String attributeList)
     {
         out.println ("RA> " + name + ".project (" + attributeList + ")");
 
@@ -137,7 +137,7 @@ public class Table
             newKey = pAttribute; //all attributes if not                                                                                                                 
 
 
-        Table     result     = new Table (name + count++, pAttribute, colDomain, newKey);
+        UnindexedTable result = new UnindexedTable (name + count++, pAttribute, colDomain, newKey);
 
         for (Comparable [] tup : tuples) {
             result.tuples.add (extractTup (tup, colPos));
@@ -156,13 +156,13 @@ public class Table
      * @return the table consisting of tuples satisfying the condition
      * @author Ryan Gell
      */
-    public Table select (String condition)
+    public UnindexedTable select (String condition)
     {
         out.println ("RA> " + name + ".select (" + condition + ")");
 
        String [] postfix = infix2postfix (condition);           // FIX: uncomment after impl
 	System.out.println(Arrays.toString(postfix));
-        Table     result  = new Table (name + count++, attribute, domain, key);
+        UnindexedTable     result  = new UnindexedTable (name + count++, attribute, domain, key);
 
         for (Comparable [] tup : tuples) {
             if (evalTup (postfix, tup)) result.tuples.add (tup);
@@ -178,11 +178,11 @@ public class Table
      * @return  the table representing the union (this U table2)
      * @author minh pham
      */
-    public Table union (Table table2)
+    public UnindexedTable union (UnindexedTable table2)
     {
         out.println ("RA> " + name + ".union (" + table2.name + ")");
 
-        Table result = new Table (name + count++, attribute, domain, key);
+        UnindexedTable result = new UnindexedTable (name + count++, attribute, domain, key);
         if (!this.compatible(table2)){
         	return result;
         }
@@ -212,11 +212,11 @@ public class Table
      * @return  the table representing the difference (this - table2)
      * @author: Nicholas Sobrilsky
      */
-    public Table minus (Table table2)
+    public UnindexedTable minus (UnindexedTable table2)
     {
         out.println ("RA> " + name + ".minus (" + table2.name + ")");
 
-        Table result = new Table (name + count++, attribute, domain, key);
+        UnindexedTable result = new UnindexedTable (name + count++, attribute, domain, key);
 
 	if ( !this.compatible(table2) ){
 	    System.err.println("Error: Tables not compatible. " + name + " returned.");
@@ -234,7 +234,8 @@ public class Table
 
         return result;
     } // minus
-/***************************************************************************
+
+    /***************************************************************************
      * Join this table and table2.  If an attribute name appears in both tables,
      * assume it is from the first table unless it is qualified with the first
      * letter of the second table's name (e.g., "s.").
@@ -247,11 +248,10 @@ public class Table
      * @param condition  the join condition for tuples
      * @param table2     the rhs table in the join operation
      * @return  the table representing the join (this |><| table2)
-     * @author Nicholas Sobrilsky
      */
-    public Table join (String condition, Table table2)
-    { 
-        out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
+    public UnindexedTable join (String condition, UnindexedTable table2)
+    {
+              out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
 	
 	String [] postfix = infix2postfix(condition);
 	boolean keepAllAttributes = (postfix[1].substring(0, 2).equals("s."));
@@ -311,7 +311,7 @@ public class Table
 		}
 	}
 	
-	Table result = new Table (name + count++, resultAttribute, resultDomain, key);
+	UnindexedTable result = new UnindexedTable (name + count++, resultAttribute, resultDomain, key);
 		
 	boolean noMatch=false;
 		
@@ -354,7 +354,6 @@ public class Table
 	}
         return result;
     } // join
-
 /***************************************************************************
      * Insert a tuple to the table.
      * #usage movie.insert ("'Star_Wars'", 1977, 124, "T", "Fox", 12345)
@@ -468,7 +467,7 @@ public class Table
      * @return  whether the two tables are compatible
      * @author  Nicholas Sobrilsky
      */
-    private boolean compatible (Table table2)
+    private boolean compatible (UnindexedTable table2)
     {
         if ( this.getAttributeLength()!=table2.getAttributeLength() ){
               return false;
@@ -516,96 +515,7 @@ public class Table
         return colPos;
     } // match
 
-    /***************************************************************************
-     * Check whether the tuple satisfies the condition.  Use a stack-based postfix  else{
-         s.add(bool1 || bool2);
-         }
-         }
 
-
-        } // for
-     System.out.println();
-
-        return (Boolean) s.pop ();
-    } // evalTup
-
-    /***************************************************************************
-* Pack tuple tup into a record/byte-buffer (array of bytes).
-* @param tup the array of attribute values forming the tuple
-* @return a tuple packed into a record/byte-buffer
-*
-byte [] pack (Comparable [] tup)
-{
-byte [] record = new byte [tupleSize ()];
-byte [] b = null;
-int s = 0;
-int i = 0;
-
-for (int j = 0; j < domain.length; j++) {
-switch (domain [j].getName ()) {
-case "java.lang.Integer":
-b = Conversions.int2ByteArray ((Integer) tup [j]);
-s = 4;
-break;
-case "java.lang.String":
-b = ((String) tup [j]).getBytes ();
-s = 64;
-break;
-
-//-----------------\\
-// TO BE IMPLEMENTED \\
-//---------------------\\
-
-} // switch
-if (b == null) {
-out.println ("Table.pack: byte array b is null");
-return null;
-} // if
-for (int k = 0; k < s; k++) record [i++] = b [k];
-} // for
-return record;
-} // pack
-*/
-
-    /***************************************************************************
-* Unpack the record/byte-buffer (array of bytes) to reconstruct a tuple.
-* @param record the byte-buffer in which the tuple is packed
-* @return an unpacked tuple
-*
-Comparable [] unpack (byte [] record)
-{
-//-----------------\\
-// TO BE IMPLEMENTED \\
-//---------------------\\
-
-return null;
-} // unpack
-*/
-
-    /***************************************************************************
-* Determine the size of tuples in this table in terms of the number of bytes
-* required to store it in a record/byte-buffer.
-* @return the size of packed-tuples in bytes
-*
-private int tupleSize ()
-{
-int s = 0;
-
-for (int j = 0; j < domain.length; j++) {
-switch (domain [j].getName ()) {
-case "java.lang.Integer": s += 4; break;
-case "java.lang.String": s += 64; break;
-
-//-----------------\\
-// TO BE IMPLEMENTED \\
-//---------------------\\
-
-} // if
-} // for
-
-return s;
-} // tupleSize
-*/
 
     //------------------------ Static Utility Methods --------------------------
 
@@ -882,11 +792,12 @@ return s;
 	private Comparable getValueOf(String key, Comparable[] tup){
 		return getValueAt(attributeIndex(key), tup);	
 	}//getValueOf
-    /***************************************************************************
+ /***************************************************************************
      * Pack tuple tup into a record/byte-buffer (array of bytes).
      * @param tup  the array of attribute values forming the tuple
      * @return  a tuple packed into a record/byte-buffer
-     * 
+     * Minh Pham
+     */
     byte [] pack (Comparable [] tup)
     {
         byte [] record = new byte [tupleSize ()];
@@ -894,71 +805,142 @@ return s;
         int     s      = 0;
         int     i      = 0;
 
-        for (int j = 0; j < domain.length; j++) {
-            switch (domain [j].getName ()) {
-            case "java.lang.Integer":
-                b = Conversions.int2ByteArray ((Integer) tup [j]);
-                s = 4;
-                break;
-            case "java.lang.String":
-                b = ((String) tup [j]).getBytes ();
-                s = 64;
-                break;
-
-             //-----------------\\ 
-            // TO BE IMPLEMENTED \\
-           //---------------------\\ 
-
-            } // switch
-            if (b == null) {
-                out.println ("Table.pack: byte array b is null");
-                return null;
-            } // if
-            for (int k = 0; k < s; k++) record [i++] = b [k];
-        } // for
+		for (int j = 0; j < domain.length; j++) {
+			if(domain [j].getName().equalsIgnoreCase("java.lang.Integer")){
+				b = Conversions.int2ByteArray ((Integer) tup [j]);
+				s = 4;
+			}
+			else if(domain [j].getName().equalsIgnoreCase("java.lang.Short")){
+				b = Conversions.short2ByteArray((Short) tup[j]);
+				s = 2;			
+			}
+			else if(domain [j].getName().equalsIgnoreCase("java.lang.String")){
+				b = ((String) tup [j]).getBytes ();
+				s = 64;
+			}
+			else if(domain [j].getName().equalsIgnoreCase("java.lang.Double")){
+				b = Conversions.double2ByteArray((Double) tup[j]);
+				s = 8;			
+			}
+			else if(domain [j].getName().equalsIgnoreCase("java.lang.Float")){
+				b = Conversions.float2ByteArray((Float) tup[j]);
+				s = 4;			
+			}
+			else if(domain [j].getName().equalsIgnoreCase("java.lang.Long")){
+				b = Conversions.long2ByteArray((Long) tup[j]);
+				s = 8;			
+			}
+			else if(domain [j].getName().equalsIgnoreCase("java.lang.Character")){
+			    b[0] = (byte) ((Character) tup[j] & 0xff);
+				s = 1;			
+			}
+			else{
+				System.out.println("cannot recognize type -> cannot pack");
+			}
+			
+			
+			if (b == null) {
+				out.println ("Table.pack: byte array b is null");
+				return null;
+			} // if
+			for (int k = 0; k < s; k++) {
+				if(k<b.length){
+					record [i++] = b [k];
+				}
+				else{
+					record[i++] = (byte)'\0';
+				}
+			}
+		} // for
         return record;
     } // pack
-     */
+     
 
     /***************************************************************************
      * Unpack the record/byte-buffer (array of bytes) to reconstruct a tuple.
-     * @param record  the byte-buffer in which the tuple is packed
+     * @param record the byte-buffer in which the tuple is packed
      * @return  an unpacked tuple
-     * 
+     * @author Zachary Freeland
+     */
     Comparable [] unpack (byte [] record)
     {
-             //-----------------\\ 
-            // TO BE IMPLEMENTED \\
-           //---------------------\\ 
+	Comparable[] result = new Comparable[domain.length];
+	ByteBuffer bb = ByteBuffer.wrap(record);
 
-        return null;
+	for(int j=0; j < domain.length; j++) {
+	    if( domain [j].getName().equalsIgnoreCase("java.lang.Integer") ) {
+		result[j] = bb.getInt();
+	    } else if( domain [j].getName().equalsIgnoreCase("java.lang.Short") ) {
+		result[j] = bb.getShort();
+	    } else if( domain [j].getName().equalsIgnoreCase("java.lang.Double") ) {
+		result[j] = bb.getDouble();
+	    } else if( domain [j].getName().equalsIgnoreCase("java.lang.Float") ) {
+		result[j] = bb.getFloat();
+	    } else if( domain [j].getName().equalsIgnoreCase("java.lang.Long") ) {
+		result[j] = bb.getLong();
+	    } else if( domain [j].getName().equalsIgnoreCase("java.lang.Character") ) {
+		result[j] = (char) bb.get();
+	    } else if( domain [j].getName().equalsIgnoreCase("java.lang.String") ) {
+		byte[] temp = new byte[64];
+		if(bb.remaining() < 64)
+		    temp = new byte[bb.remaining()];
+		bb.get(temp);
+		int i=0;
+		for(; i < 64 && temp[i] !='\0'; i++);//fixes alignment problems if string length is less than 15 characters
+		byte[] temp2 = new byte[i];
+		for(i=0; i < 64 && temp[i] !='\0'; i++)
+		    temp2[i] = temp[i];
+		result[j] = new String(temp2);
+	    } else {
+		System.out.println("cannot recognize type -> cannot pack");
+	    }
+	}//for
+
+        return result;
     } // unpack
-     */
+
 
     /***************************************************************************
      * Determine the size of tuples in this table in terms of the number of bytes
      * required to store it in a record/byte-buffer.
      * @return  the size of packed-tuples in bytes
-     * 
+     * Minh Pham
+     */
     private int tupleSize ()
     {
         int s = 0;
 
-        for (int j = 0; j < domain.length; j++) {
-            switch (domain [j].getName ()) {
-            case "java.lang.Integer": s += 4;  break;
-            case "java.lang.String":  s += 64; break;
-
-              //-----------------\\ 
-             // TO BE IMPLEMENTED \\
-            //---------------------\\ 
-
-            } // if
-        } // for
-
+	 	for (int j = 0; j < domain.length; j++) {
+			if(domain [j].getName ().equalsIgnoreCase("java.lang.Integer")) s+=4;
+			else if(domain [j].getName ().equalsIgnoreCase("java.lang.Long")) s+=8;
+			else if(domain [j].getName ().equalsIgnoreCase("java.lang.Short")) s+=2;
+			else if(domain [j].getName ().equalsIgnoreCase("java.lang.Character")) s++;
+			else if(domain [j].getName ().equalsIgnoreCase("java.lang.Double")) s+=8;
+			else if(domain [j].getName ().equalsIgnoreCase("java.lang.Float")) s+=4;
+			else if(domain [j].getName ().equalsIgnoreCase("java.lang.String")) s+=64;
+			else{
+				System.out.println("cannot recognize domain");
+			}// if clause
+		}// for loop
+		
         return s;
     } // tupleSize
-     */
+    /**
+    * Returns the value held in the key domains of a tuple
+    * @author Ryan Gell 
+    */
+    public Comparable[] getKeyVal(Comparable[] tuple){
+    	Comparable[] keyVal = new Comparable [key.length];
+	int [] cols = match(key);
+	for(int i = 0; i < keyVal.length; i++) keyVal [i] = tuple[cols[i]];
+	return keyVal;
+    }
+    /**
+    *
+    */
+    public Comparable[] getTupFromKey(Comparable[] key){
+    	return index.get(new KeyType(key));
+    }
 
     //------------------------ Static Utility Methods --------------------------
 
