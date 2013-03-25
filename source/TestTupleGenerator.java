@@ -44,7 +44,7 @@ public class TestTupleGenerator
         test.addRelSchema ("Teaching",
                            "crsCode semester profId",
                            "String String Integer",
-                           "crcCode semester",
+                           "crsCode semester",
                            new String [][] {{ "profId", "Professor", "id" },
                                             { "crsCode", "Course", "crsCode" }});
         
@@ -56,11 +56,54 @@ public class TestTupleGenerator
                                             { "crsCode", "Course", "crsCode" },
                                             { "crsCode semester", "Teaching", "crsCode semester" }});
 
-        String [] tables = { "Student", "Professor", "Course", "Transcript", "Teaching" };
-        
-        int tups [] = new int [] { 10000, 1000, 2000, 50000, 5000 };
+        String [] tables = { "Student", "Professor", "Course", "Teaching", "Transcript" };
+
+
+        int tups [] = new int [] { 10000, 1000, 2000, 5000, 50000 };
+
+	for(int i = 0; i < args.length && i < 5; i++)
+	    tups[i] = new Integer(args[i]);
     
         Comparable [][][] resultTest = test.generate (tups);
+
+
+	IndexTable [] tableList = {
+	    new IndexTable("Student",
+                           "id name address status",
+                           "Integer String String String",
+						  "id"), 
+	    new IndexTable("Professor",
+                           "id name deptId",
+                           "Integer String String",
+                           "id"),
+	    new IndexTable("Course",
+                           "crsCode deptId crsName descr",
+                           "String String String String",
+                           "crsCode"),
+	    new IndexTable("Teaching",
+                           "crsCode semester profId",
+                           "String String Integer",
+                           "crsCode semester"),
+	    new IndexTable("Transcript",
+                           "studId crsCode semester grade",
+                           "Integer String String String",
+                           "studId crsCode semester") };
+
+
+
+        for (int i = 0; i < resultTest.length; i++) {
+            out.println (tables [i]);
+	    Comparable [] tuple = new Comparable[resultTest[i][0].length];
+            for (int j = 0; j < resultTest [i].length; j++) {
+                for (int k = 0; k < resultTest [i][j].length; k++) {
+                    tuple[k] = resultTest [i][j][k];
+                } // for
+		tableList[i].insert(tuple);
+            } // for
+        } // for
+
+
+
         
         for (int i = 0; i < resultTest.length; i++) {
             out.println (tables [i]);
