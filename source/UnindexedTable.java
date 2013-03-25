@@ -67,8 +67,8 @@ public class UnindexedTable
         attribute = _attribute;
         domain    = _domain;
         key       = _key;
-        //tuples    = new ArrayList <Comparable[]> ();                // also try FileList, see below
-        tuples    = new UnindexedFileList (this, tupleSize ());
+        tuples    = new ArrayList <Comparable[]> ();                // also try FileList, see below
+        //tuples    = new UnindexedFileList (this, tupleSize ());
         index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
     } // Table
 

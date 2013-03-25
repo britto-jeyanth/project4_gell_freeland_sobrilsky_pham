@@ -320,7 +320,7 @@ public class ExtHash <K, V>
      */
     private int h (Object key)
     {
-        return key.hashCode () % mod;
+        return Math.abs(key.hashCode () % mod);
     } // h
 
     /***************************************************************************

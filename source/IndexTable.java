@@ -68,7 +68,8 @@ public class IndexTable
         attribute = _attribute;
         domain    = _domain;
         key       = _key;
-        tuples    = new IndexFileList (this, tupleSize ());
+	tuples	  = new ArrayList <Comparable[]> (); 
+        //tuples    = new IndexFileList (this, tupleSize ());
         //index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
         index     = new ExtHash<KeyType, Comparable[]> (KeyType.class, Comparable[].class, attribute.length);
         //index = new BpTree <KeyType, Comparable[]> (KeyType.class, Comparable[].class);	// code for index if using BpTree
@@ -84,7 +85,7 @@ public class IndexTable
     {
         this (name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
-        out.println ("DDL> create table " + name + " (" + attributes + ")");
+        //out.println ("DDL> create table " + name + " (" + attributes + ")");
     } // Table
 
     /***************************************************************************
@@ -107,7 +108,7 @@ public class IndexTable
      */
     public IndexTable project (String attributeList)
     {
-        out.println ("RA> " + name + ".project (" + attributeList + ")");
+        //out.println ("RA> " + name + ".project (" + attributeList + ")");
 
         String [] pAttribute = attributeList.split (" ");
         int []    colPos     = match (pAttribute);
@@ -163,7 +164,7 @@ public class IndexTable
      */
     public IndexTable select (String condition)
     {
-        out.println ("RA> " + name + ".select (" + condition + ")");
+       //out.println ("RA> " + name + ".select (" + condition + ")");
 
        String [] postfix = infix2postfix (condition);
 	System.out.println(Arrays.toString(postfix));
@@ -185,7 +186,7 @@ public class IndexTable
      */
     public IndexTable union (IndexTable table2)
     {
-        out.println ("RA> " + name + ".union (" + table2.name + ")");
+        //out.println ("RA> " + name + ".union (" + table2.name + ")");
         IndexTable result = new IndexTable (name + count++, attribute, domain, key);
         if (!this.compatible(table2)){
         	return result;
@@ -213,7 +214,7 @@ public class IndexTable
      */
     public IndexTable minus (IndexTable table2)
     {
-        out.println ("RA> " + name + ".minus (" + table2.name + ")");
+        //out.println ("RA> " + name + ".minus (" + table2.name + ")");
 
         IndexTable result = new IndexTable (name + count++, attribute, domain, key);
 
@@ -249,7 +250,7 @@ public class IndexTable
      */
     public IndexTable join (String condition, IndexTable table2)
     { 
-        out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
+        //out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
 	
 	String [] postfix = infix2postfix(condition);
 	boolean keepAllAttributes = (postfix[1].substring(0, 2).equals("s."));
@@ -350,6 +351,7 @@ public class IndexTable
 		
 		result.insert(resultTup);
 	}
+	System.out.println("Join done!");
         return result;
     } // join
 /***************************************************************************
@@ -360,7 +362,7 @@ public class IndexTable
      */
     public boolean insert (Comparable [] tup)
     {
-        out.println ("DML> insert into " + name + " values ( " + Arrays.toString (tup) + " )");
+        //out.println ("DML> insert into " + name + " values ( " + Arrays.toString (tup) + " )");
 
         if (typeCheck (tup, domain)) {
             tuples.add (tup);

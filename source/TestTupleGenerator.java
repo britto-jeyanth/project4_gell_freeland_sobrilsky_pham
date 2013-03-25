@@ -28,41 +28,15 @@ public class TestTupleGenerator
                            "Integer String String String",
                            "id",
                            null);
-        
-        test.addRelSchema ("Professor",
-                           "id name deptId",
-                           "Integer String String",
-                           "id",
-                           null);
-        
-        test.addRelSchema ("Course",
-                           "crsCode deptId crsName descr",
-                           "String String String String",
-                           "crsCode",
-                           null);
-        
-        test.addRelSchema ("Teaching",
-                           "crsCode semester profId",
-                           "String String Integer",
-                           "crsCode semester",
-                           new String [][] {{ "profId", "Professor", "id" },
-                                            { "crsCode", "Course", "crsCode" }});
-        
-        test.addRelSchema ("Transcript",
-                           "studId crsCode semester grade",
-                           "Integer String String String",
-                           "studId crsCode semester",
-                           new String [][] {{ "studId", "Student", "id"},
-                                            { "crsCode", "Course", "crsCode" },
-                                            { "crsCode semester", "Teaching", "crsCode semester" }});
 
-        String [] tables = { "Student", "Professor", "Course", "Teaching", "Transcript" };
+        String [] tables = { "Student"};
 
+        int[] tups = new int[args.length];
 
-        int tups [] = new int [] { 10000, 1000, 2000, 5000, 50000 };
-
-	for(int i = 0; i < args.length && i < 5; i++)
+	for(int i = 0; i < args.length; i++){
 	    tups[i] = new Integer(args[i]);
+	    
+	}
     
         Comparable [][][] resultTest = test.generate (tups);
 
@@ -71,23 +45,7 @@ public class TestTupleGenerator
 	    new IndexTable("Student",
                            "id name address status",
                            "Integer String String String",
-						  "id"), 
-	    new IndexTable("Professor",
-                           "id name deptId",
-                           "Integer String String",
-                           "id"),
-	    new IndexTable("Course",
-                           "crsCode deptId crsName descr",
-                           "String String String String",
-                           "crsCode"),
-	    new IndexTable("Teaching",
-                           "crsCode semester profId",
-                           "String String Integer",
-                           "crsCode semester"),
-	    new IndexTable("Transcript",
-                           "studId crsCode semester grade",
-                           "Integer String String String",
-                           "studId crsCode semester") };
+						  "id")};
 
 
 
