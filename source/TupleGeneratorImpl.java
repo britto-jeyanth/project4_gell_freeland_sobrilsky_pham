@@ -22,17 +22,17 @@ public class TupleGeneratorImpl
 
     /** Initializations 
      */
-    private HashMap <String, Comparable [][]> result = new HashMap <> ();
+    private HashMap <String, Comparable [][]> result = new HashMap <String, Comparable [][]> ();
 
-    private HashMap <Integer, String> tableIndex = new HashMap <> ();
+    private HashMap <Integer, String> tableIndex = new HashMap <Integer, String> ();
 
-    private HashMap <String, String []> tableAttr = new HashMap <> ();
+    private HashMap <String, String []> tableAttr = new HashMap <String, String []> ();
 
-    private HashMap <String, String []> tableDomain = new HashMap <> ();
+    private HashMap <String, String []> tableDomain = new HashMap <String, String []> ();
 
-    private HashMap <String, String []> tablepks = new HashMap <> ();
+    private HashMap <String, String []> tablepks = new HashMap <String, String []> ();
 
-    HashMap <String, String [][]> tablefks = new HashMap <> ();
+    HashMap <String, String [][]> tablefks = new HashMap <String, String [][]> ();
     
     /***************************************************************************
      * Adding relation to Schema.
@@ -88,14 +88,14 @@ public class TupleGeneratorImpl
         int           iVal;
         String        sVal;
         double        dVal;
-
         for (int i = 0; i < tuples.length; i++) {
+	    
             tableName = tableIndex.get (i);
             attribute = tableAttr.get (tableName);
             domain    = tableDomain.get (tableName);
             pks       = tablepks.get (tableName);
             fks       = tablefks.get (tableName);
-            Comparable [][] subResult = new Comparable [tuples [i]][attribute.length];
+            Comparable [][] subResult = new Comparable[tuples[i]][attribute.length];
 
             // out.println (tableName);
             for (int n = 0; n < pks.length; n++) pKeys.add (pks [n]);
@@ -106,41 +106,41 @@ public class TupleGeneratorImpl
             if (fks == null) {
                 for (int j = 0; j < tuples[i]; j++) {
                     for (int k = 0; k < attribute.length; k++) {
-                        if (pKeys.contains (attribute[k])) {  // key requires uniqueness
-
-                            switch (domain[k]) {
-                            case "Integer":
+                        if (pKeys.contains (attribute[k])) {  // key requires uniqueness 
+                            if(domain[k].equals("Integer")){
                                 for (iVal = rand.nextInt (1000000); pKeyValues.contains (iVal);
                                      iVal = rand.nextInt (1000000));
                                 subResult[j][k] = iVal;
                                 pKeyValues.add (iVal);
-                                break;
-                            case "String":
+                            }
+                            else if(domain[k].equals("String")){
                                 for (sVal = attribute[k] + rand.nextInt (1000000); pKeyValues.contains(sVal);
                                      sVal = attribute[k] + rand.nextInt (1000000));
                                 subResult[j][k] = sVal;
                                 pKeyValues.add (sVal);
-                                break;
-                            case "Double":
+                            }
+                            else if(domain[k].equals("Double")){
                                 for (dVal = rand.nextInt (1000000) * rand.nextDouble (); pKeyValues.contains( dVal);
                                      dVal = rand.nextInt (1000000) * rand.nextDouble ());
                                 subResult[j][k] = dVal;
                                 pKeyValues.add (dVal);
-                                break;
-                            default:
+                            }
+                            else{
                                 throw new IllegalArgumentException("Invalid type in switch: " + domain[k]);
                             } // switch
 
                         } else {  // non-key does not require uniqueness
 
-                            switch (domain[k]) {
-                            case "Integer":
-                                subResult[j][k] = rand.nextInt(1000000); break;
-                            case "String":
-                                subResult[j][k] = attribute [k] + rand.nextInt (1000000); break;
-                            case "Double":
-                                subResult[j][k] = rand.nextInt (100000) * rand.nextDouble (); break;
-                            default:
+                            if (domain[k].equals("Integer")){
+                                subResult[j][k] = rand.nextInt(1000000);
+			    }
+                            else if (domain[k].equals( "String")){
+                                subResult[j][k] = attribute [k] + rand.nextInt (1000000);
+			    }
+                            else if (domain[k].equals("Double")){
+                                subResult[j][k] = rand.nextInt (100000) * rand.nextDouble (); 
+			    }
+                            else{
                                 throw new IllegalArgumentException("Invalid type in switch: " + domain[k]);
                             } // switch
 
@@ -203,39 +203,37 @@ public class TupleGeneratorImpl
                         if ( ! fkIndex.contains (attribute[k])) {
                             if (pKeys.contains (attribute[k])) {
 
-                                switch (domain[k]) {
-                                case "Integer":
+                                if(domain[k].equals("Integer")){
                                     for (iVal = rand.nextInt (1000000); pKeyValues.contains (iVal);
                                          iVal = rand.nextInt (1000000));
                                     subResult[j][k] = iVal;
                                     pKeyValues.add (iVal);
-                                    break;
-                                case "String":
+                                 }
+                                 else if(domain[k].equals("String")){
                                     for (sVal = attribute[k] + rand.nextInt (1000000); pKeyValues.contains (sVal);
                                          sVal = attribute[k] + rand.nextInt (1000000));
                                     subResult[j][k] = sVal;
                                     pKeyValues.add (sVal);
-                                    break;
-                                case "Double":
+                                 }
+                                 else if(domain[k].equals("Double")){
                                     for (dVal = rand.nextInt (1000000) * rand.nextDouble (); pKeyValues.contains (dVal);
                                          dVal = rand.nextInt (1000000) * rand.nextDouble ());
                                     subResult[j][k] = dVal;
                                     pKeyValues.add (dVal);
-                                    break;
-                                default:
+                                    }
+                                else{
                                     throw new IllegalArgumentException("Invalid type in switch: " + domain[k]);
                                 } // if
 
                             } else {
 
-                                switch (domain[k]) {
-                                case "Integer":
-                                    subResult[j][k] = rand.nextInt (1000000); break;
-                                case "String":
-                                    subResult[j][k] = attribute [k] + rand.nextInt (1000000); break;
-                                case "Double":
-                                    subResult[j][k] = rand.nextInt (1000000) * rand.nextDouble (); break;
-                                default:
+                                if (domain[k].equals("Integer")){
+                                    subResult[j][k] = rand.nextInt (1000000);}
+                                else if (domain[k].equals("String")){
+                                    subResult[j][k] = attribute [k] + rand.nextInt (1000000); }
+                                else if (domain[k].equals("Double")){
+                                    subResult[j][k] = rand.nextInt (1000000) * rand.nextDouble (); }
+                                else{
                                     throw new IllegalArgumentException("Invalid type in switch: " + domain[k]);
                                 } // if
 

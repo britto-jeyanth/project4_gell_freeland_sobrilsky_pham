@@ -82,7 +82,7 @@ public class UnindexedTable
     {
         this (name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
-        out.println ("DDL> create table " + name + " (" + attributes + ")");
+        //out.println ("DDL> create table " + name + " (" + attributes + ")");
     } // Table
 
     /***************************************************************************
@@ -105,7 +105,7 @@ public class UnindexedTable
      */
     public UnindexedTable project (String attributeList)
     {
-        out.println ("RA> " + name + ".project (" + attributeList + ")");
+        //out.println ("RA> " + name + ".project (" + attributeList + ")");
 
         String [] pAttribute = attributeList.split (" ");
         int []    colPos     = match (pAttribute);
@@ -158,7 +158,7 @@ public class UnindexedTable
      */
     public UnindexedTable select (String condition)
     {
-        out.println ("RA> " + name + ".select (" + condition + ")");
+        //out.println ("RA> " + name + ".select (" + condition + ")");
 
        String [] postfix = infix2postfix (condition);           // FIX: uncomment after impl
 	System.out.println(Arrays.toString(postfix));
@@ -180,7 +180,7 @@ public class UnindexedTable
      */
     public UnindexedTable union (UnindexedTable table2)
     {
-        out.println ("RA> " + name + ".union (" + table2.name + ")");
+        //out.println ("RA> " + name + ".union (" + table2.name + ")");
 
         UnindexedTable result = new UnindexedTable (name + count++, attribute, domain, key);
         if (!this.compatible(table2)){
@@ -214,7 +214,7 @@ public class UnindexedTable
      */
     public UnindexedTable minus (UnindexedTable table2)
     {
-        out.println ("RA> " + name + ".minus (" + table2.name + ")");
+        //out.println ("RA> " + name + ".minus (" + table2.name + ")");
 
         UnindexedTable result = new UnindexedTable (name + count++, attribute, domain, key);
 
@@ -251,7 +251,7 @@ public class UnindexedTable
      */
     public UnindexedTable join (String condition, UnindexedTable table2)
     {
-              out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
+              //out.println ("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
 	
 	String [] postfix = infix2postfix(condition);
 	boolean keepAllAttributes = (postfix[1].substring(0, 2).equals("s."));
@@ -362,7 +362,7 @@ public class UnindexedTable
      */
     public boolean insert (Comparable [] tup)
     {
-        out.println ("DML> insert into " + name + " values ( " + Arrays.toString (tup) + " )");
+        //out.println ("DML> insert into " + name + " values ( " + Arrays.toString (tup) + " )");
 
         if (typeCheck (tup, domain)) {
             tuples.add (tup);
