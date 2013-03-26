@@ -22,22 +22,22 @@ class MovieDB
     {
         out.println ();
 
-        Table movie = new Table ("movie", "title year length genre studioName producerNo",
+        IndexTable movie = new IndexTable ("movie", "title year length genre studioName producerNo",
                                           "String Integer Integer String String Integer", "title year");
 
-        Table cinema = new Table ("cinema", "title year length genre studioName producerNo",
+        IndexTable cinema = new IndexTable ("cinema", "title year length genre studioName producerNo",
                                             "String Integer Integer String String Integer", "title year");
 
-        Table movieStar = new Table ("movieStar", "name address gender birthdate",
+        IndexTable movieStar = new IndexTable ("movieStar", "name address gender birthdate",
                                                   "String String Character String", "name");
 
-        Table starsIn = new Table ("starsIn", "movieTitle movieYear starName",
+        IndexTable starsIn = new IndexTable ("starsIn", "movieTitle movieYear starName",
                                               "String Integer String", "movieTitle movieYear starName");
 
-        Table movieExec = new Table ("movieExec", "certNo name address fee",
+        IndexTable movieExec = new IndexTable ("movieExec", "certNo name address fee",
                                                   "Integer String String Float", "certNo");
 
-        Table studio = new Table ("studio", "name address presNo",
+        IndexTable studio = new IndexTable ("studio", "name address presNo",
                                             "String String Integer", "name");
 
         Comparable [] film0 = { "Star_Wars", 1977, 124, "sciFi", "Fox", 12345 };
@@ -87,22 +87,22 @@ class MovieDB
         studio.print ();
 
         out.println ();
-        Table t_project = movie.project ("title year");
+        IndexTable t_project = movie.project ("title year");
         t_project.print ();
         out.println ();
-        Table t_select = movie.select ("title == 'Star_Wars' & year == 1977");
+        IndexTable t_select = movie.select ("title == 'Star_Wars' & year == 1977");
         t_select.print ();
 
         out.println ();
-        Table t_union = movie.union (cinema);
+        IndexTable t_union = movie.union (cinema);
         t_union.print ();
 
         out.println ();
-        Table t_minus = movie.minus (cinema);
+        IndexTable t_minus = movie.minus (cinema);
         t_minus.print ();
 
         out.println ();
-        Table t_join =  movie.join ("studioName == name", studio);
+        IndexTable t_join =  movie.join ("studioName == name", studio);
         t_join.print ();
     } // main
 
