@@ -67,8 +67,8 @@ public class UnindexedTable
         attribute = _attribute;
         domain    = _domain;
         key       = _key;
-        tuples    = new ArrayList <Comparable[]> ();                // also try FileList, see below
-        //tuples    = new UnindexedFileList (this, tupleSize ());
+        //tuples    = new ArrayList <Comparable[]> ();                // also try FileList, see below
+        tuples    = new UnindexedFileList (this, tupleSize ());
         index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
     } // Table
 
@@ -342,7 +342,6 @@ public class UnindexedTable
 		
 		skipCounter = 0;
 		for(int t2FillIndex=0; t2FillIndex<t2FillLimit; t2FillIndex++){
-			out.println(t2FillIndex);
 			if(table2.getAttributeAt(t2FillIndex).equals(rightCondName) && !keepAllAttributes){
 				skipCounter--;
 				continue;

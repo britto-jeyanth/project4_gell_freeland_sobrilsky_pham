@@ -2,8 +2,8 @@ import static java.lang.System.out;
 import java.io.*;
 public class TimeTester
 {
-/*
-	private static UnindexedTable makeTable(int d){
+
+	private static IndexTable makeTable(int d){
 		TupleGenerator test = new TupleGeneratorImpl ();
         	test.addRelSchema ("Student",
        		                   "id name address gpa",
@@ -17,8 +17,8 @@ public class TimeTester
 		tups[0] = d;
     	   	Comparable [][][] resultTest = test.generate (tups);
 
-		UnindexedTable [] tableList = {
-		 			new UnindexedTable("Student",
+		IndexTable [] tableList = {
+		 			new IndexTable("Student",
         	        		"id name address gpa",
         	        	        "Integer String String Double",
 					"id")};
@@ -35,8 +35,8 @@ public class TimeTester
         	} // for
 		return tableList[0];
 	}
-*/
-	private static UnindexedTable[] makeTables(){
+
+	private static IndexTable[] makeTables(int d){
 		TupleGenerator test = new TupleGeneratorImpl ();
         	
         	test.addRelSchema ("Student",
@@ -73,29 +73,29 @@ public class TimeTester
 		String [] tables = { "Student", "Professor", "Course", "Teaching", "Transcript" };
 
 	
-        	int[] tups = new int [] { 10000, 1000, 2000, 50000, 5000 };
+        	int[] tups = new int [] { d, d/2, d/2, d/2, d};
 
     	   	Comparable [][][] resultTest = test.generate (tups);
 
 		
-		UnindexedTable [] tableList = {
-			new UnindexedTable("Student",
+		IndexTable [] tableList = {
+			new IndexTable("Student",
                            "id name address status",
                            "Integer String String String",
 			   "id"),
-			new UnindexedTable("Professor",
+			new IndexTable("Professor",
                            "id name deptId",
                            "Integer String String",
                            "id"),
-			new UnindexedTable("Course",
+			new IndexTable("Course",
                            "crsCode deptId crsName descr",
                            "String String String String",
                            "crsCode"),
-			new UnindexedTable("Teaching",
+			new IndexTable("Teaching",
                            "crsCode semester profId",
                            "String String Integer",
                            "crsCode semester"),
-			new UnindexedTable("Transcript",
+			new IndexTable("Transcript",
                            "studId crsCode semester grade",
                            "Integer String String String",
                            "studId crsCode semester") };
@@ -111,12 +111,14 @@ public class TimeTester
         	} // for
 		return tableList;
 	}
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException{
+	    for(int d = 1000; d <= 7000; d += 1000){
 		try{
-			FileWriter fstream = new FileWriter("UnindexedArrayPointSelect.txt");
+
+			FileWriter fstream = new FileWriter("IndexedExtPointSelect"+d+".txt");
 			BufferedWriter out = new BufferedWriter(fstream);
 				for(int i = 0; i < 40; i++){
-					UnindexedTable t = makeTables()[0];
+					IndexTable t = makeTable(d);
 					long startTime = System.nanoTime();
 					t.select("id == 111111");
 					long endTime = System.nanoTime();
@@ -124,10 +126,10 @@ public class TimeTester
 				
 				}
 			out.close();
-			fstream = new FileWriter("UnindexdArrayRangeSelect.txt");
+			fstream = new FileWriter("IndexedExtRangeSelect"+d+".txt");
 			out = new BufferedWriter(fstream);
 				for(int i = 0; i < 40; i++){
-					UnindexedTable t = makeTables()[0];
+					IndexTable t = makeTable(d);
 					long startTime = System.nanoTime();
 					t.select("id >= 500000");
 					long endTime = System.nanoTime();
@@ -135,20 +137,23 @@ public class TimeTester
 				
 				}
 			out.close();
-			fstream = new FileWriter("UnindexArrayJoin.txt");
+			fstream = new FileWriter("IndexedExtJoin"+d+".txt");
 			out = new BufferedWriter(fstream);
-				for(int i = 0; i < 40; i++){
-					UnindexedTable[] t = makeTables();
-					long startTime = System.nanoTime();
-					t[0].join("id == studId",t[4]);
-					long endTime = System.nanoTime();
-					out.write(i + "	"+ (endTime-startTime)+'\n');
+			for(int i = 0; i < 40; i++){
+				IndexTable[] t = makeTables(d);
+				long startTime = System.nanoTime();
+				System.out.println(t[4]);
+				t[0].join("studId == id",t[4]);
+				long endTime = System.nanoTime();
+				out.write(i + "	"+ (endTime-startTime)+'\n');
 				
-				}
+			}
 			out.close();
 		}
 		catch(Exception e){
 			System.err.println("Error: " + e.getMessage());
 		}
-	}		
+			
+	}
+	}
 } // main

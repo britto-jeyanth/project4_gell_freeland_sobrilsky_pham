@@ -68,8 +68,8 @@ public class IndexTable
         attribute = _attribute;
         domain    = _domain;
         key       = _key;
-	tuples	  = new ArrayList <Comparable[]> (); 
-        //tuples    = new IndexFileList (this, tupleSize ());
+	//tuples	  = new ArrayList <Comparable[]> (); 
+        tuples    = new IndexFileList (this, tupleSize ());
         //index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
         index     = new ExtHash<KeyType, Comparable[]> (KeyType.class, Comparable[].class, attribute.length);
         //index = new BpTree <KeyType, Comparable[]> (KeyType.class, Comparable[].class);	// code for index if using BpTree
@@ -254,18 +254,19 @@ public class IndexTable
 	
 	String [] postfix = infix2postfix(condition);
 	boolean keepAllAttributes = (postfix[1].substring(0, 2).equals("s."));
-		 
+	
 	int attrDomSize = this.getAttributeLength() + table2.getAttributeLength();
 	
 	String rightCondName;
 	
-	if(!keepAllAttributes){
-		attrDomSize--;
-		rightCondName=postfix[1];
-	}
-	else{
+	//if(!keepAllAttributes){
+	//	System.out.println("UhOh!");
+	//	attrDomSize--;
+	//	rightCondName=postfix[1];
+	//}
+	//else{
 		rightCondName=postfix[1].substring(2);
-	}
+	//}
 	String leftCondName = postfix[0];
 	String [] resultAttribute = new String[attrDomSize];
 	Class [] resultDomain = new Class[attrDomSize];
@@ -318,7 +319,6 @@ public class IndexTable
 	    Boolean fault = false;
 		Comparable [] resultTup = new Comparable[attrDomSize];
 		if(table2.getValueOf(rightCondName, this.tuples.get(m) ) != null){
-			System.out.printf("asdf");
 			for(int t1FillIndex=0; t1FillIndex<this.getAttributeLength(); t1FillIndex++){
 				resultTup[t1FillIndex]=this.getValueAt(t1FillIndex, this.tuples.get(m));
 			} //Adds all items from table1 tuple at index m to resultTup
@@ -326,17 +326,16 @@ public class IndexTable
 			
 			skipCounter = 0;
 			for(int t2FillIndex=0; t2FillIndex<t2FillLimit; t2FillIndex++){
-				out.println(t2FillIndex);
 				if(table2.getAttributeAt(t2FillIndex).equals(rightCondName) && !keepAllAttributes){
 					skipCounter--;
 					continue;
 				}
 				//should not use table2.tuples.get(m)
-				System.out.println(leftCondName);
+
 				Comparable temp = this.getValueOf(leftCondName, this.tuples.get(m));
 				Comparable[] c = new Comparable[1];
 				c[0] = temp;
-				if(c[0] != null){
+				if(c[0] != null && table2.getTupFromKey(c) != null){
 				     resultTup[this.getAttributeLength()+t2FillIndex+skipCounter]=table2.getValueAt(t2FillIndex, table2.getTupFromKey(c));
 				 }else{
 				    System.out.println("No key returned");
@@ -351,48 +350,7 @@ public class IndexTable
 		System.out.println("Join done!");
 		return result;
   } //join
-/*	
-	for(int m=0; m<this.tuples.size(); m++){
-		Comparable [] resultTup = new Comparable[attrDomSize];
-		int table1MatchIndex=0;
-		int table2MatchIndex=0;
-		for (int n=0; n<table2.tuples.size(); n++){
-			if( this.getValueAt(this.columnPos(postfix[0]), this.tuples.get(m)).equals(table2.getValueAt(table2.columnPos(rightCondName), table2.tuples.get(n))) ){
-				table2MatchIndex = n;
-				break;
-			}
-			else if(n==table2.tuples.size()-1){
-				noMatch=true;
-			}
-		} //Matches a tuple from each table that meets the condition
-		
-		if(noMatch){
-			noMatch=false;
-			continue;
-		}
-		
-		for(int t1FillIndex=0; t1FillIndex<this.getAttributeLength(); t1FillIndex++){
-			resultTup[t1FillIndex]=this.getValueAt(t1FillIndex, this.tuples.get(m));
-		} //Adds all items from table1 tuple at index m to resultTup
-		
-		int t2FillLimit=table2.getAttributeLength();
-		
-		skipCounter = 0;
-		for(int t2FillIndex=0; t2FillIndex<t2FillLimit; t2FillIndex++){
-			out.println(t2FillIndex);
-			if(table2.getAttributeAt(t2FillIndex).equals(rightCondName) && !keepAllAttributes){
-				skipCounter--;
-				continue;
-			}
-			resultTup[this.getAttributeLength()+t2FillIndex+skipCounter]=table2.getValueAt(t2FillIndex, table2.tuples.get(table2MatchIndex));
-		} //Adds all unskipped items from the matched tuple in table2
-		
-		result.insert(resultTup);
-	}
-	System.out.println("Join done!");
-        return result;
-    } // join
-    */
+
 /***************************************************************************
      * Insert a tuple to the table.
      * #usage movie.insert ("'Star_Wars'", 1977, 124, "T", "Fox", 12345)
