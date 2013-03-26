@@ -312,8 +312,35 @@ public class IndexTable
 	
 	IndexTable result = new IndexTable (name + count++, resultAttribute, resultDomain, key);
 		
-	boolean noMatch=false;
-		
+	//boolean noMatch=false;
+	
+	for (int m=0; m<this.tuples.size(); m++){
+		Comparable [] resultTup = new Comparable[attrDomSize];
+		if(table2.getValueOf(rightCondName, this.tuples.get(m) ) != null){
+			System.out.printf("asdf");
+			for(int t1FillIndex=0; t1FillIndex<this.getAttributeLength(); t1FillIndex++){
+				resultTup[t1FillIndex]=this.getValueAt(t1FillIndex, this.tuples.get(m));
+			} //Adds all items from table1 tuple at index m to resultTup
+			int t2FillLimit=table2.getAttributeLength();
+			
+			skipCounter = 0;
+			for(int t2FillIndex=0; t2FillIndex<t2FillLimit; t2FillIndex++){
+				out.println(t2FillIndex);
+				if(table2.getAttributeAt(t2FillIndex).equals(rightCondName) && !keepAllAttributes){
+					skipCounter--;
+					continue;
+				}
+				//should not use table2.tuples.get(m)
+				resultTup[this.getAttributeLength()+t2FillIndex+skipCounter]=table2.getValueAt(t2FillIndex, table2.tuples.get(m));
+			} //Adds all unskipped items from the matched tuple in table2
+			
+			result.insert(resultTup);
+		}
+	}
+		System.out.println("Join done!");
+		return result;
+  } //join
+/*	
 	for(int m=0; m<this.tuples.size(); m++){
 		Comparable [] resultTup = new Comparable[attrDomSize];
 		int table1MatchIndex=0;
@@ -354,6 +381,7 @@ public class IndexTable
 	System.out.println("Join done!");
         return result;
     } // join
+    */
 /***************************************************************************
      * Insert a tuple to the table.
      * #usage movie.insert ("'Star_Wars'", 1977, 124, "T", "Fox", 12345)
@@ -640,7 +668,11 @@ public class IndexTable
      * @author Ryan Gell
      */	
 	private Comparable getValueAt(int index, Comparable [] tup){
-		return tup[index];	
+		if(index>=0){
+			return tup[index];
+		}
+		return null;
+			
 	}//getValueAt
      /**
      * Returns the value of a certain attribute in a tup
