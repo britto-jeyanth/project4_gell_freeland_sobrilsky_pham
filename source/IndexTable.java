@@ -266,7 +266,7 @@ public class IndexTable
 	else{
 		rightCondName=postfix[1].substring(2);
 	}
-	
+	String leftCondName = postfix[0];
 	String [] resultAttribute = new String[attrDomSize];
 	Class [] resultDomain = new Class[attrDomSize];
 		
@@ -315,6 +315,7 @@ public class IndexTable
 	//boolean noMatch=false;
 	
 	for (int m=0; m<this.tuples.size(); m++){
+	    Boolean fault = false;
 		Comparable [] resultTup = new Comparable[attrDomSize];
 		if(table2.getValueOf(rightCondName, this.tuples.get(m) ) != null){
 			System.out.printf("asdf");
@@ -331,10 +332,20 @@ public class IndexTable
 					continue;
 				}
 				//should not use table2.tuples.get(m)
-				resultTup[this.getAttributeLength()+t2FillIndex+skipCounter]=table2.getValueAt(t2FillIndex, table2.tuples.get(m));
+				System.out.println(leftCondName);
+				Comparable temp = this.getValueOf(leftCondName, this.tuples.get(m));
+				Comparable[] c = new Comparable[1];
+				c[0] = temp;
+				if(c[0] != null){
+				     resultTup[this.getAttributeLength()+t2FillIndex+skipCounter]=table2.getValueAt(t2FillIndex, table2.getTupFromKey(c));
+				 }else{
+				    System.out.println("No key returned");
+				    fault = true;}
 			} //Adds all unskipped items from the matched tuple in table2
-			
-			result.insert(resultTup);
+				if(!fault){
+				    result.insert(resultTup);
+				    
+				}
 		}
 	}
 		System.out.println("Join done!");
