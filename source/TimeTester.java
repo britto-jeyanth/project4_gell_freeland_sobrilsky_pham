@@ -113,9 +113,9 @@ public class TimeTester
 	}
 	public static void main(String[] args) throws IOException{
 	    for(int d = 1000; d <= 7000; d += 1000){
-		try{
+		//try{
 
-			FileWriter fstream = new FileWriter("IndexedExtPointSelect"+d+".txt");
+			FileWriter fstream = new FileWriter("IndexedBpPointSelect"+d+".txt");
 			BufferedWriter out = new BufferedWriter(fstream);
 				for(int i = 0; i < 40; i++){
 					IndexTable t = makeTable(d);
@@ -126,7 +126,7 @@ public class TimeTester
 				
 				}
 			out.close();
-			fstream = new FileWriter("IndexedExtRangeSelect"+d+".txt");
+			fstream = new FileWriter("IndexedBpRangeSelect"+d+".txt");
 			out = new BufferedWriter(fstream);
 				for(int i = 0; i < 40; i++){
 					IndexTable t = makeTable(d);
@@ -137,7 +137,7 @@ public class TimeTester
 				
 				}
 			out.close();
-			fstream = new FileWriter("IndexedExtJoin"+d+".txt");
+			fstream = new FileWriter("IndexedBpJoin"+d+".txt");
 			out = new BufferedWriter(fstream);
 			for(int i = 0; i < 40; i++){
 				IndexTable[] t = makeTables(d);
@@ -149,10 +149,10 @@ public class TimeTester
 				
 			}
 			out.close();
-		}
-		catch(Exception e){
-			System.err.println("Error: " + e.getMessage());
-		}
+	//	}
+	//	catch(Exception e){
+	//		System.err.println("Error: " + e.getMessage());
+	//	}
 			
 	}
 	}

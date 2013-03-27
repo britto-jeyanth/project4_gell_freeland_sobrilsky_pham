@@ -71,8 +71,8 @@ public class IndexTable
 	//tuples	  = new ArrayList <Comparable[]> (); 
         tuples    = new IndexFileList (this, tupleSize ());
         //index     = new TreeMap <KeyType, Comparable[]> ();                  // also try BPTreeMap, LinHash or ExtHash
-        index     = new ExtHash<KeyType, Comparable[]> (KeyType.class, Comparable[].class, attribute.length);
-        //index = new BpTree <KeyType, Comparable[]> (KeyType.class, Comparable[].class);	// code for index if using BpTree
+        //index     = new ExtHash<KeyType, Comparable[]> (KeyType.class, Comparable[].class, attribute.length);
+        index = new BpTree <KeyType, Comparable[]> (KeyType.class, Comparable[].class);	// code for index if using BpTree
      } // Table
 
     /***************************************************************************
