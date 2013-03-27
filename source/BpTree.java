@@ -421,11 +421,9 @@ public class BpTree <K extends Comparable <K>, V>
 	if(pos<n.nKeys && n.key[pos].compareTo(key)==0){
               System.out.println ("BpTree:insert: attempt to insert duplicate key = " + key);
               n.ref[pos]=ref;
-       return;
 	}
-		
 	// check number of entries
-    	if(n.nKeys==ORDER-1){									// n has ORDER-1 entries -> insertion causes node n splitting
+    	else if(n.nKeys==ORDER-1){									// n has ORDER-1 entries -> insertion causes node n splitting
     		Node newNode = split(key, ref, n);
 			
     		if(p==null);										// case: n points to root -> create new root
@@ -509,7 +507,7 @@ public class BpTree <K extends Comparable <K>, V>
         int mid = ORDER/2;       	// mid of node n
 
         // key is on the left within node n
-        if(pos<mid){
+        if(pos<mid || (pos == mid && ORDER%2 == 1) ){
         	if(ORDER%2==0) mid--;
         	
         	// copy to newnode
@@ -527,6 +525,7 @@ public class BpTree <K extends Comparable <K>, V>
         	if(ORDER%2==1) mid++;
         	n.nKeys=mid;
         	pos-=mid;
+
 
         	// copy to new node
             for(int i=0; i< (ORDER-2)/2; i++){
@@ -560,8 +559,8 @@ public class BpTree <K extends Comparable <K>, V>
         BpTree <Integer, Integer> bpt = new BpTree <Integer, Integer> (Integer.class, Integer.class);
         int totKeys = 45;
         if (args.length == 1) totKeys = Integer.valueOf (args [0]);
-        for (int i = 1; i < totKeys; i += 2) bpt.put (i, i * i);
-        ((BpTree)bpt.subMap(1,25)).print ();
+        for (int i = 1; i < totKeys; i += 1) bpt.put (i, 2*i);
+        bpt.print ();
         for (int i = 0; i < totKeys; i++) {
             out.println ("key = " + i + " value = " + bpt.get (i));
         } // for

@@ -60,10 +60,10 @@ public class TestTupleGenerator
             } // for
         } // for
 
-
+	tableList[0].print();
 
         
-        for (int i = 0; i < resultTest.length; i++) {
+	/*        for (int i = 0; i < resultTest.length; i++) {
             out.println (tables [i]);
             for (int j = 0; j < resultTest [i].length; j++) {
                 for (int k = 0; k < resultTest [i][j].length; k++) {
@@ -72,7 +72,7 @@ public class TestTupleGenerator
                 out.println ();
             } // for
             out.println ();
-        } // for
+	    } */// for
     } // main
 
 } // TestTupleGenerator
